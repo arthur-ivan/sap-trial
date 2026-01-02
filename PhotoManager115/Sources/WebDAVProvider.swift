@@ -116,16 +116,83 @@ public class WebDAVProvider: CloudStorageProvider {
     }
     
     private func parseWebDAVResponse(_ data: Data) throws -> [WebDAVItem] {
-        // Simplified XML parsing for WebDAV response
-        // In a real implementation, use XMLParser or a proper XML library
+        // Basic WebDAV XML response parsing
+        // A production implementation should use XMLParser or a proper XML library
         var items: [WebDAVItem] = []
         
         guard let xmlString = String(data: data, encoding: .utf8) else {
             throw StorageError.invalidResponse
         }
         
-        // This is a very basic placeholder
-        // Real implementation would properly parse the XML
+        // Simple pattern matching for basic WebDAV responses
+        // This is a simplified implementation - production code should use proper XML parsing
+        let lines = xmlString.components(separatedBy: "\n")
+        var currentHref: String?
+        var currentIsDirectory = false
+        var currentContentType: String?
+        var currentSize: Int64 = 0
+        var currentModified = Date()
+        
+        for line in lines {
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            
+            // Extract href (file path)
+            if trimmed.contains("<D:href>") || trimmed.contains("<d:href>") {
+                let start = trimmed.range(of: ">")?.upperBound
+                let end = trimmed.range(of: "</", options: .backwards)?.lowerBound
+                if let start = start, let end = end {
+                    currentHref = String(trimmed[start..<end])
+                }
+            }
+            
+            // Check if it's a directory
+            if trimmed.contains("<D:collection") || trimmed.contains("<d:collection") {
+                currentIsDirectory = true
+            }
+            
+            // Extract content type
+            if trimmed.contains("<D:getcontenttype>") || trimmed.contains("<d:getcontenttype>") {
+                let start = trimmed.range(of: ">")?.upperBound
+                let end = trimmed.range(of: "</", options: .backwards)?.lowerBound
+                if let start = start, let end = end {
+                    currentContentType = String(trimmed[start..<end])
+                }
+            }
+            
+            // Extract size
+            if trimmed.contains("<D:getcontentlength>") || trimmed.contains("<d:getcontentlength>") {
+                let start = trimmed.range(of: ">")?.upperBound
+                let end = trimmed.range(of: "</", options: .backwards)?.lowerBound
+                if let start = start, let end = end, let size = Int64(String(trimmed[start..<end])) {
+                    currentSize = size
+                }
+            }
+            
+            // When we reach the end of a response element, create the item
+            if trimmed.contains("</D:response>") || trimmed.contains("</d:response>") {
+                if let href = currentHref, let serverURL = serverURL, let url = URL(string: serverURL + href) {
+                    let name = href.components(separatedBy: "/").last ?? href
+                    let item = WebDAVItem(
+                        name: name,
+                        path: href,
+                        size: currentSize,
+                        contentType: currentContentType,
+                        createdDate: currentModified,
+                        modifiedDate: currentModified,
+                        isDirectory: currentIsDirectory,
+                        url: url
+                    )
+                    items.append(item)
+                }
+                
+                // Reset for next item
+                currentHref = nil
+                currentIsDirectory = false
+                currentContentType = nil
+                currentSize = 0
+            }
+        }
+        
         return items
     }
     

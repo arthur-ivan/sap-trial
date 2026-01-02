@@ -44,6 +44,10 @@
     </array>
     <key>NSAppTransportSecurity</key>
     <dict>
+        <!-- WARNING: NSAllowsArbitraryLoads is enabled for development purposes -->
+        <!-- This allows HTTP connections in addition to HTTPS -->
+        <!-- For production, this should be removed or restricted to specific domains -->
+        <!-- Recommended: Use NSExceptionDomains to whitelist specific HTTP servers -->
         <key>NSAllowsArbitraryLoads</key>
         <true/>
     </dict>

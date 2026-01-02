@@ -1,11 +1,22 @@
 import Foundation
+#if canImport(Combine)
+import Combine
+#endif
 
 /// Main service for managing photos from various cloud storage providers
+#if canImport(Combine)
+public class PhotoManagerService: ObservableObject {
+    @Published public private(set) var photos: [Photo] = []
+    @Published public private(set) var albums: [Album] = []
+    @Published public private(set) var isLoading = false
+    @Published public private(set) var error: Error?
+#else
 public class PhotoManagerService {
     public private(set) var photos: [Photo] = []
     public private(set) var albums: [Album] = []
     public private(set) var isLoading = false
     public private(set) var error: Error?
+#endif
     
     private var currentProvider: CloudStorageProvider?
     private var imageCache: NSCache<NSString, NSData>

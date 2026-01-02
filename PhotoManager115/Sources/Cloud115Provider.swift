@@ -80,7 +80,10 @@ public class Cloud115Provider: CloudStorageProvider {
         }
         
         // Parse and return albums
-        // This is a placeholder structure
+        // Note: This requires implementing proper JSON parsing based on actual 115 API response
+        // The 115 Cloud API is not officially documented and requires reverse engineering
+        // A real implementation would parse the JSON response to extract album information
+        // Example structure might be: { "data": { "folders": [{"id": "...", "name": "..."}] } }
         return []
     }
     
@@ -101,6 +104,10 @@ public class Cloud115Provider: CloudStorageProvider {
         }
         
         // Parse and return photos
+        // Note: This requires implementing proper JSON parsing based on actual 115 API response
+        // The 115 Cloud API is not officially documented and requires reverse engineering
+        // A real implementation would parse the JSON response to extract photo information
+        // Example structure might be: { "data": { "files": [{"id": "...", "name": "...", "url": "..."}] } }
         return []
     }
     
